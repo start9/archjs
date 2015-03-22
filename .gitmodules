@@ -1,0 +1,3 @@
+[submodule "example/virtjs"]
+	path = example/virtjs
+	url = git@github.com:arcanis/virtjs

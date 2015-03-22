@@ -1,0 +1,4 @@
+ENGINE_NAME=gambatte
+ENGINE_ROM_NAME=game.gb
+
+include Makefile.common

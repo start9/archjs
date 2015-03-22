@@ -1,0 +1,4 @@
+ENGINE_NAME=vbanext
+ENGINE_ROM_NAME=game.gba
+
+include Makefile.common

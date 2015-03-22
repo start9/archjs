@@ -1,0 +1,14 @@
+/dist/archjs-gambatte
+/dist/archjs-vbanext
+
+.#*
+*.o
+*.tmp
+
+*.a
+*.bc
+
+*.gb
+*.gbc
+*.gba
+*.sav

@@ -1,0 +1,97 @@
+ENGINE_ROM_NAME ?= rom.gb
+
+ifndef ENGINE_NAME
+  $(error "You need to define the engine architecture")
+endif
+
+SHELL = bash
+
+CFLAGS = -std=c99
+
+CPPFLAGS += -W -Wall -Werror -Wno-unused-parameter
+CPPFLAGS += -I $(shell pwd)/includes
+
+ifdef EMMAKEN_COMPILER
+
+    MEMORY = $$((64*1024*1024))
+
+    TARGET = dist/archjs-$(ENGINE_NAME).js
+
+    SOURCES = \
+      systems/libretro-$(ENGINE_NAME).bc \
+      sources/bridge_retro.c.o \
+      sources/bridge_virtjs.js \
+      sources/frontend.c.o \
+      sources/input_formats.c.o \
+      sources/main.c.o
+
+    EXTRA_SOURCES = \
+      sources/prologue.js \
+      sources/epilogue.js \
+      Makefile.$(ENGINE_NAME) \
+      Makefile.common
+
+    LDFLAGS += --memory-init-file 0
+    LDFLAGS += -s NO_EXIT_RUNTIME=1 -s TOTAL_MEMORY=$(MEMORY)
+
+else
+
+    TARGET = dist/archjs-$(ENGINE_NAME)
+
+    SOURCES = \
+      sources/bridge_retro.c.o \
+      sources/bridge_virtjs.c.o \
+      sources/frontend.c.o \
+      sources/input_formats.c.o \
+      sources/main.c.o
+
+    EXTRA_SOURCES = \
+      systems/libretro-$(ENGINE_NAME).a \
+      Makefile.$(ENGINE_NAME) \
+      Makefile.common
+
+    CPPFLAGS += $(shell pkg-config --cflags sdl2)
+
+    LDFLAGS += -L systems -lretro-$(ENGINE_NAME)
+    LDFLAGS += $(shell pkg-config --libs sdl2)
+
+endif
+
+ifdef DEBUG
+
+    CPPFLAGS += -g
+
+else
+
+    CPPFLAGS += -O3
+
+    ifdef EMMAKEN_COMPILER
+        LDFLAGS += --llvm-lto 3
+    endif
+
+endif
+
+all: $(TARGET)
+
+$(TARGET): $(SOURCES) $(EXTRA_SOURCES)
+	$(CXX) -o $(TARGET) $(filter-out %.js, $(SOURCES)) $(addprefix --js-library , $(filter %.js, $(SOURCES))) $(LDFLAGS)
+ifdef EMMAKEN_COMPILER
+	cat sources/prologue.js > $(TARGET).tmp
+	cat $(TARGET) >> $(TARGET).tmp
+	cat sources/epilogue.js | sed -e 's/@(ENGINE_NAME)/$(ENGINE_NAME)/g' -e 's/@(ENGINE_ROM_NAME)/$(ENGINE_ROM_NAME)/' >> $(TARGET).tmp
+	mv $(TARGET).tmp $(TARGET)
+endif
+
+%.c.o: %.c Makefile.$(ENGINE_NAME) Makefile.common
+	$(CC) -c -o $(@) $(<) $(CFLAGS) $(CPPFLAGS)
+
+clean:
+	@$(RM) -f **/*.o
+	@$(RM) -f **/*.tmp
+
+fclean: clean
+	@$(RM) -f $(TARGET)
+
+re: clean all
+
+.PHONY: all clean re

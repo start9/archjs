@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+
+    <head>
+        <script>var Module = { noInitialRun : true }</script>
+        <style>html, body, #screen, #selector { display: block; margin: 0; padding: 0; width: 100%; height: 100%; }</style>
+        <style>#selector, #overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }</style>
+        <style>#overlay { pointer-events: none; background: #FFFFFF; }</style>
+    </head>
+
+    <body>
+        <canvas id="screen"></canvas>
+        <input id="selector" type="file" />
+        <div id="overlay">Click to select a file</div>
+    </body>
+
+    <script>var ENGINE = location.hash.substr( 1, location.hash.indexOf( ':' ) !== -1 ? location.hash.indexOf( ':' ) : undefined )</script>
+    <script>var GAMEPATH = location.hash.indexOf( ':' ) !== -1 ? location.hash.substr( location.hash.indexOf( ':' ) + 1 ) : undefined</script>
+
+    <script>document.write('<script src="/dist/archjs-'+ENGINE+'.js"></'+'script>')</script>
+
+    <script src="https://jspm.io/system.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fpsmeter/0.3.1/fpsmeter.min.js"></script>
+
+    <script>System.paths['virtjs/*'] = '/example/virtjs/sources/*.js'</script>
+    <script>System.import('~/main').then( function ( m ) { return m.main( ); } ).catch( function ( error ) { console.error( error.stack || error ) } )</script>
+
+</html>
