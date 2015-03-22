@@ -17,12 +17,12 @@
     <script>var ENGINE = location.hash.substr( 1, location.hash.indexOf( ':' ) !== -1 ? location.hash.indexOf( ':' ) : undefined )</script>
     <script>var GAMEPATH = location.hash.indexOf( ':' ) !== -1 ? location.hash.substr( location.hash.indexOf( ':' ) + 1 ) : undefined</script>
 
-    <script>document.write('<script src="/dist/archjs-'+ENGINE+'.js"></'+'script>')</script>
+    <script>document.write('<script src="../dist/archjs-'+ENGINE+'.js"></'+'script>')</script>
 
     <script src="https://jspm.io/system.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fpsmeter/0.3.1/fpsmeter.min.js"></script>
 
-    <script>System.paths['virtjs/*'] = '/example/virtjs/sources/*.js'</script>
+    <script>System.paths['virtjs/*'] = './virtjs/sources/*.js'</script>
     <script>System.import('~/main').then( function ( m ) { return m.main( ); } ).catch( function ( error ) { console.error( error.stack || error ) } )</script>
 
 </html>
