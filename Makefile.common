@@ -1,7 +1,9 @@
-ENGINE_ROM_NAME ?= rom.gb
-
 ifndef ENGINE_NAME
   $(error "You need to define the engine architecture")
+endif
+
+ifndef ENGINE_ROM_NAME
+  $(error "You need to define the engine default rom name")
 endif
 
 SHELL = bash
@@ -32,7 +34,7 @@ ifdef EMMAKEN_COMPILER
       Makefile.common
 
     LDFLAGS += --memory-init-file 0
-    LDFLAGS += -s NO_EXIT_RUNTIME=1 -s TOTAL_MEMORY=$(MEMORY)
+    LDFLAGS += -s NO_EXIT_RUNTIME=1 -s INVOKE_RUN=0 -s TOTAL_MEMORY=$(MEMORY)
 
 else
 
@@ -64,9 +66,10 @@ ifdef DEBUG
 else
 
     CPPFLAGS += -O3
+    LDFLAGS += -O3
 
     ifdef EMMAKEN_COMPILER
-        LDFLAGS += --llvm-lto 3
+        LDFLAGS += --llvm-lto 3 -s OUTLINING_LIMIT=50000 -s PRECISE_F32=2
     endif
 
 endif

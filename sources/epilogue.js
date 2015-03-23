@@ -10,7 +10,7 @@
 
         var devices = options.devices;
 
-        this._emscripten = instanciateEmscripten( { noInitialRun : true } );
+        this._emscripten = instanciateEmscripten( );
 
         this._emscripten.print = function ( message ) { console.log( message ); };
         this._emscripten.printErr = function ( message ) { console.error( message ); };
