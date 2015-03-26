@@ -21,6 +21,7 @@ int frontend_save_state( void );
 
 int frontend_set_state( void const * state, size_t size );
 int frontend_get_state( void const ** state, size_t * size );
+int frontend_reset_state( void );
 
 #ifdef __cplusplus
 }

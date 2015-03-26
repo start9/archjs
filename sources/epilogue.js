@@ -10,6 +10,8 @@
 
         var devices = options.devices;
 
+        this._defaultFileName = options.defaultFileName || '@(ENGINE_ROM_NAME)';
+
         this._emscripten = instanciateEmscripten( );
 
         this._emscripten.print = function ( message ) { console.log( message ); };
@@ -30,6 +32,7 @@
 
         this._frontendGetState = this._emscripten.Module.cwrap( 'frontend_get_state', 'number', [ 'number', 'number' ] );
         this._frontendSetState = this._emscripten.Module.cwrap( 'frontend_set_state', 'number', [ 'number', 'number' ] );
+        this._frontendResetState = this._emscripten.Module.cwrap( 'frontend_reset_state', 'number', [ ] );
 
         this._emscripten.Module.callMain( [ ] );
 
@@ -69,7 +72,7 @@
             this._emscripten.FS.unlink( this._lastCreatedFile );
         }
 
-        this._lastCreatedFile = '/' + ( options.fileName || '@ENGINE_ROM_NAME' );
+        this._lastCreatedFile = '/' + ( options.fileName || this._defaultFileName );
 
         var stackPointer = this._emscripten.Runtime.stackSave( );
 
@@ -87,12 +90,26 @@
             this.setState( initialState );
 
         if ( autoStart ) {
-            this.run( );
+            this.start( );
         }
 
     };
 
+    Engine.prototype.resetState = function ( ) {
+
+        var result = this._frontendResetState( );
+
+        if ( result < 0 )
+            throw new Error( 'Cannot reset state at this time - the emulator returned ' + result );
+
+        return this;
+
+    };
+
     Engine.prototype.setState = function ( arrayBuffer ) {
+
+        if ( ! arrayBuffer )
+            return this.resetState( );
 
         var stackPointer = this._emscripten.Runtime.stackSave( );
 
@@ -131,7 +148,7 @@
 
     };
 
-    Engine.prototype.run = function ( ) {
+    Engine.prototype.start = function ( ) {
 
         this._frontendStart( );
 

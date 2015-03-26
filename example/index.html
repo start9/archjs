@@ -14,7 +14,7 @@
         <div id="overlay">Click to select a file</div>
     </body>
 
-    <script>var ENGINE = location.hash.substr( 1, location.hash.indexOf( ':' ) !== -1 ? location.hash.indexOf( ':' ) : undefined )</script>
+    <script>var ENGINE = location.hash.substring( 1, location.hash.indexOf( ':' ) !== -1 ? location.hash.indexOf( ':' ) : undefined )</script>
     <script>var GAMEPATH = location.hash.indexOf( ':' ) !== -1 ? location.hash.substr( location.hash.indexOf( ':' ) + 1 ) : undefined</script>
 
     <script>document.write('<script src="../dist/archjs-'+ENGINE+'.js"></'+'script>')</script>

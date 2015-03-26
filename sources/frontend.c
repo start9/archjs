@@ -171,3 +171,10 @@ int EMSCRIPTEN_KEEPALIVE frontend_get_state( void const ** state, size_t * size 
 
     return 0;
 }
+
+int EMSCRIPTEN_KEEPALIVE frontend_reset_state( void )
+{
+    retro_reset( );
+
+    return 0;
+}
