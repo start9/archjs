@@ -50,6 +50,9 @@
     Engine.inputMap.A = 8;
     Engine.inputMap.B = 0;
 
+    Engine.inputMap.L = 10;
+    Engine.inputMap.R = 11;
+
     Engine.inputMap.SELECT = 2;
     Engine.inputMap.START = 3;
 
