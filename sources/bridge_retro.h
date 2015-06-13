@@ -16,4 +16,4 @@ int16_t bridge_retro_input_state( unsigned port, unsigned device, unsigned index
 
 void bridge_retro_audio_sample( int16_t left, int16_t right );
 
-size_t bridge_retro_audio_sample_batch( int16_t const * data, size_t frames );
+size_t bridge_retro_audio_sample_batch( int16_t const * samples, size_t count );

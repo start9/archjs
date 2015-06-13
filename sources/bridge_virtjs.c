@@ -17,6 +17,9 @@ static SDL_Window * g_window = NULL;
 static SDL_Surface * g_screen = NULL;
 static SDL_Surface * g_pending = NULL;
 
+static int16_t * g_audio_samples = NULL;
+static size_t g_audio_sample_count = 0;
+
 static unsigned g_input_width = 0;
 static unsigned g_input_height = 0;
 static unsigned g_input_pitch = 0;
@@ -43,6 +46,8 @@ static unsigned g_input_bindings[ ][ 2 ] = {
 
 static void timer_iterate( void )
 {
+    Uint32 lastTime = SDL_GetTicks( );
+
     void ( *timer_callback )( void ) = g_timer_callback;
     g_timer_callback = NULL;
 
@@ -60,6 +65,71 @@ static void timer_iterate( void )
     }
 
     timer_callback( );
+
+    Uint32 currentTime = SDL_GetTicks( );
+
+    Uint32 obtained = currentTime - lastTime;
+    Uint32 expected = 1000 / 60;
+
+    if ( obtained < expected ) {
+        SDL_Delay( expected - obtained );
+    }
+}
+
+static void audio_write( int16_t const * samples, size_t count )
+{
+    SDL_LockAudio( );
+
+    int16_t * previous_samples = g_audio_samples;
+    size_t previous_count = g_audio_sample_count;
+
+    g_audio_sample_count = previous_count + count;
+    g_audio_samples = calloc( g_audio_sample_count * 2, sizeof( int16_t ) );
+
+    for ( size_t index = 0; index < previous_count; ++ index )
+        g_audio_samples[ index ] = previous_samples[ index ];
+
+    for ( size_t index = 0; index < count; ++ index )
+        g_audio_samples[ previous_count + index ] = samples[ index ];
+
+    free( previous_samples );
+
+    /*
+    printf( "sound write ( %4lu : ---- )", count * 2 );
+    for ( size_t t = 0; t < count * 2; ++ t ) printf( " %02X", ((unsigned char*)samples)[ t ] );
+    printf( "\n" );
+    */
+
+    SDL_UnlockAudio( );
+}
+
+static void audio_callback( void * userdata, Uint8 * stream, int length )
+{
+    int16_t * available_samples = g_audio_samples;
+    size_t available_sample_count = g_audio_sample_count;
+
+    size_t requested_sample_count = length / 2;
+    size_t requested_byte_length = requested_sample_count * 2;
+
+    size_t providen_sample_count = requested_sample_count < available_sample_count ? requested_sample_count : available_sample_count;
+    size_t providen_byte_length = providen_sample_count * 2;
+
+    memcpy( stream, available_samples, providen_byte_length );
+    memset( stream + providen_byte_length, 0, requested_byte_length - providen_byte_length );
+
+    g_audio_samples = NULL;
+    g_audio_sample_count = 0;
+
+    if ( providen_sample_count < available_sample_count )
+        audio_write( available_samples + providen_sample_count, available_sample_count - providen_sample_count );
+
+    /*
+    printf( "sound cb    ( %4lu : %-4lu )", requested_byte_length, providen_byte_length );
+    for ( size_t t = 0; t < providen_byte_length; ++ t ) printf( " %02X", (unsigned char) stream[ t ] );
+    printf( "\n" );
+    */
+
+    free( available_samples );
 }
 
 void bridge_virtjs_input_poll_inputs( void )
@@ -140,9 +210,9 @@ void bridge_virtjs_screen_set_input_size( unsigned width, unsigned height, unsig
     g_input_height = height;
     g_input_pitch = pitch;
 
-    if ( !g_window ) {
+    if ( ! g_window ) {
 
-        SDL_Init( SDL_INIT_VIDEO );
+        SDL_InitSubSystem( SDL_INIT_VIDEO );
         SDL_ClearError( );
 
         g_window = SDL_CreateWindow( "archjs", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, g_input_width, g_input_height, SDL_WINDOW_SHOWN );
@@ -173,4 +243,37 @@ void bridge_virtjs_screen_flush_screen( void )
 
     SDL_FreeSurface( g_pending );
     g_pending = NULL;
+}
+
+void bridge_virtjs_audio_set_sample_rate( double sample_rate )
+{
+    SDL_InitSubSystem( SDL_INIT_AUDIO );
+
+    SDL_AudioSpec desired_spec;
+    SDL_AudioSpec obtained_spec;
+
+    desired_spec.freq = 48000;
+    desired_spec.format = AUDIO_S16SYS;
+    desired_spec.channels = 2;
+    desired_spec.samples = 1024;
+    desired_spec.callback = audio_callback;
+    desired_spec.userdata = NULL;
+
+    SDL_OpenAudio( &desired_spec, &obtained_spec );
+
+    SDL_PauseAudio( 0 );
+
+}
+
+void bridge_virtjs_audio_push_sample( int16_t left, int16_t right )
+{
+    int16_t sample[] = { left, right };
+    audio_write( sample, 1 );
+}
+
+size_t bridge_virtjs_audio_push_sample_batch( int16_t const * samples, size_t count )
+{
+    audio_write( samples, count );
+
+    return count;
 }

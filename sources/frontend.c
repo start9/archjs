@@ -104,6 +104,8 @@ int EMSCRIPTEN_KEEPALIVE frontend_load_game( char const * path )
     struct retro_system_av_info system_av_info;
     retro_get_system_av_info( &system_av_info );
 
+    bridge_virtjs_audio_set_sample_rate( system_av_info.timing.sample_rate );
+
     return 0;
 }
 

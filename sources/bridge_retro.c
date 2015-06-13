@@ -76,9 +76,10 @@ int16_t bridge_retro_input_state( unsigned port, unsigned device, unsigned index
 
 void bridge_retro_audio_sample( int16_t left, int16_t right )
 {
+    return bridge_virtjs_audio_push_sample( left, right );
 }
 
-size_t bridge_retro_audio_sample_batch( int16_t const * data, size_t frames )
+size_t bridge_retro_audio_sample_batch( int16_t const * data, size_t frame )
 {
-    return frames;
+    return bridge_virtjs_audio_push_sample_batch( data, frame );
 }
