@@ -86,19 +86,13 @@ static void audio_write( int16_t const * samples, size_t count )
     g_audio_sample_count = previous_count + count;
     g_audio_samples = calloc( g_audio_sample_count * 2, sizeof( int16_t ) );
 
-    for ( size_t index = 0; index < previous_count; ++ index )
+    for ( size_t index = 0; index < previous_count * 2; ++ index )
         g_audio_samples[ index ] = previous_samples[ index ];
 
-    for ( size_t index = 0; index < count; ++ index )
-        g_audio_samples[ previous_count + index ] = samples[ index ];
+    for ( size_t index = 0; index < count * 2; ++ index )
+        g_audio_samples[ previous_count * 2 + index ] = samples[ index ];
 
     free( previous_samples );
-
-    /*
-    printf( "sound write ( %4lu : ---- )", count * 2 );
-    for ( size_t t = 0; t < count * 2; ++ t ) printf( " %02X", ((unsigned char*)samples)[ t ] );
-    printf( "\n" );
-    */
 
     SDL_UnlockAudio( );
 }
@@ -108,11 +102,11 @@ static void audio_callback( void * userdata, Uint8 * stream, int length )
     int16_t * available_samples = g_audio_samples;
     size_t available_sample_count = g_audio_sample_count;
 
-    size_t requested_sample_count = length / 2;
-    size_t requested_byte_length = requested_sample_count * 2;
+    size_t requested_sample_count = length / 2 / 2;
+    size_t requested_byte_length = requested_sample_count * 2 * 2;
 
     size_t providen_sample_count = requested_sample_count < available_sample_count ? requested_sample_count : available_sample_count;
-    size_t providen_byte_length = providen_sample_count * 2;
+    size_t providen_byte_length = providen_sample_count * 2 * 2;
 
     memcpy( stream, available_samples, providen_byte_length );
     memset( stream + providen_byte_length, 0, requested_byte_length - providen_byte_length );
@@ -121,13 +115,7 @@ static void audio_callback( void * userdata, Uint8 * stream, int length )
     g_audio_sample_count = 0;
 
     if ( providen_sample_count < available_sample_count )
-        audio_write( available_samples + providen_sample_count, available_sample_count - providen_sample_count );
-
-    /*
-    printf( "sound cb    ( %4lu : %-4lu )", requested_byte_length, providen_byte_length );
-    for ( size_t t = 0; t < providen_byte_length; ++ t ) printf( " %02X", (unsigned char) stream[ t ] );
-    printf( "\n" );
-    */
+        audio_write( available_samples + providen_sample_count * 2, available_sample_count - providen_sample_count );
 
     free( available_samples );
 }
@@ -252,7 +240,7 @@ void bridge_virtjs_audio_set_sample_rate( double sample_rate )
     SDL_AudioSpec desired_spec;
     SDL_AudioSpec obtained_spec;
 
-    desired_spec.freq = 48000;
+    desired_spec.freq = ( int ) sample_rate;
     desired_spec.format = AUDIO_S16SYS;
     desired_spec.channels = 2;
     desired_spec.samples = 1024;
