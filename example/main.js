@@ -1,3 +1,5 @@
+import { VirtjsAudio }         from 'taisel/extra/VirtjsAudio';
+
 import { KeyboardInput }       from 'virtjs/devices/inputs/KeyboardInput';
 import { WebGLScreen }         from 'virtjs/devices/screens/WebGLScreen';
 import { AnimationFrameTimer } from 'virtjs/devices/timers/AnimationFrameTimer';
@@ -39,8 +41,10 @@ function run( arrayBuffer, { fileName } ) {
     var timer = new AnimationFrameTimer( );
     timer.start( ( ) => { meter.tickStart( ); window.x = 1; }, ( ) => { meter.tick( ); window.x = 0; } );
 
+    var audio = new VirtjsAudio( );
+
     var engine = new Engine( { devices : {
-        screen, timer, input
+        screen, timer, input, audio
     } } );
 
     engine.loadArrayBuffer( arrayBuffer, { fileName } );

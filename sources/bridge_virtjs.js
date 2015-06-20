@@ -2,32 +2,30 @@ mergeInto( LibraryManager.library, {
 
     $VirtjsBridge : {
 
-        getInputFormatStruct : function ( pointer ) {
+        audioFormat : function ( n ) {
 
-            var format = { };
-
-            format.depth = {{{ makeGetValue( 'pointer',  0, 'i32' ) }}};
-
-            format.rMask = {{{ makeGetValue( 'pointer',  4, 'i32' ) }}};
-            format.gMask = {{{ makeGetValue( 'pointer',  8, 'i32' ) }}};
-            format.bMask = {{{ makeGetValue( 'pointer', 12, 'i32' ) }}};
-            format.aMask = {{{ makeGetValue( 'pointer', 16, 'i32' ) }}};
-
-            return format;
+            return n / 0x8000;
 
         },
 
-        castPointerToData : function ( pointer, dataSize, itemSize ) {
+        getHeapFromDepth : function ( depth ) { switch ( depth ) {
 
-            switch ( itemSize ) {
+            default : throw new Error( 'Invalid depth (' + depth + ')' );
 
-                case  8 : return  HEAPU8.subarray( pointer / 1, ( pointer + dataSize ) / 1 );
-                case 16 : return HEAPU16.subarray( pointer / 2, ( pointer + dataSize ) / 2 );
-                case 32 : return HEAPU32.subarray( pointer / 4, ( pointer + dataSize ) / 4 );
+            case  8 : return HEAPU8;
+            case 16 : return HEAPU16;
+            case 32 : return HEAPU32;
 
-                default : throw new Error( 'Invalid pointer item length' );
+        } },
 
-            }
+        castPointerToData : function ( pointer, heap, count ) {
+
+            var bytesPerElement = heap.BYTES_PER_ELEMENT;
+
+            var start = pointer / heap.BYTES_PER_ELEMENT;
+            var end = start + count;
+
+            return heap.subarray( start, end );
 
         }
 
@@ -77,30 +75,50 @@ mergeInto( LibraryManager.library, {
 
     },
 
-    bridge_virtjs_screen_validate_input_format__deps : [ '$VirtjsBridge' ],
-    bridge_virtjs_screen_validate_input_format : function ( formatPointer ) {
+    bridge_virtjs_screen_validate_input_format : function ( depth, rMask, gMask, bMask, aMask ) {
 
-        return Module.screen.validateInputFormat( VirtjsBridge.getInputFormatStruct( formatPointer ) );
+        return Module.screen.validateInputFormat( { depth : depth, rMask : rMask, gMask : gMask, bMask : bMask, aMask : aMask } );
 
     },
 
-    bridge_virtjs_screen_set_input_format__deps : [ '$VirtjsBridge' ],
-    bridge_virtjs_screen_set_input_format : function ( formatPointer ) {
+    bridge_virtjs_screen_set_input_format : function ( depth, rMask, gMask, bMask, aMask ) {
 
-        Module.screen.setInputFormat( VirtjsBridge.getInputFormatStruct( formatPointer ) );
+        Module.screen.setInputFormat( { depth : depth, rMask : rMask, gMask : gMask, bMask : bMask, aMask : aMask } );
 
     },
 
     bridge_virtjs_screen_set_input_data__deps : [ '$VirtjsBridge' ],
     bridge_virtjs_screen_set_input_data : function ( dataPointer ) {
 
-        Module.screen.setInputData( VirtjsBridge.castPointerToData( dataPointer, Module.screen.inputHeight * Module.screen.inputPitch, Module.screen.inputFormat.depth ) );
+        var heap = VirtjsBridge.getHeapFromDepth( Module.screen.inputFormat.depth );
+
+        Module.screen.setInputData( VirtjsBridge.castPointerToData( dataPointer, heap, Module.screen.inputHeight * Module.screen.inputPitch ) );
 
     },
 
     bridge_virtjs_screen_flush_screen : function ( ) {
 
         Module.screen.flushScreen( );
+
+    },
+
+    bridge_virtjs_screen_set_input_data__deps : [ '$VirtjsBridge' ],
+    bridge_virtjs_audio_validate_input_format : function ( sampleRate ) {
+
+        return Module.audio.validateInputFormat( { sampleRate : sampleRate, channelCount : 2, formatCallback : VirtjsBridge.audioFormat } );
+
+    },
+
+    bridge_virtjs_screen_set_input_data__deps : [ '$VirtjsBridge' ],
+    bridge_virtjs_audio_set_input_format : function ( sampleRate ) {
+
+        Module.audio.setInputFormat( { sampleRate : sampleRate, channelCount : 2, formatCallback : VirtjsBridge.audioFormat } );
+
+    },
+
+    bridge_virtjs_audio_push_sample_batch : function ( samplesPointer, count ) {
+
+        Module.audio.pushSampleBatch( VirtjsBridge.castPointerToData( samplesPointer, HEAP16, count * 2 ) );
 
     }
 

@@ -19,12 +19,19 @@
 
     <script>document.write('<script src="../dist/archjs-'+ENGINE+'.js"></'+'script>')</script>
 
+    <script src="https://rawgit.com/taisel/XAudioJS/master/XAudioServer.js"></script>
+    <script src="https://rawgit.com/taisel/XAudioJS/master/resampler.js"></script>
+
     <script src="vendors/CoreJs-0.9.6.min.js"></script>
     <script src="vendors/FpsMeter-0.3.1.min.js"></script>
 
     <script src="https://jspm.io/system.js"></script>
 
     <script>System.paths['virtjs/*'] = './virtjs/sources/*.js'</script>
+    <script>System.paths['taisel/*'] = './taisel/sources/*.js'</script>
+
+    <script>System.config({ transpiler: 'babel', babelOptions: { stage: 0 } })</script>
+
     <script>System.import('~/main').then( function ( m ) { return m.main( ); } ).catch( function ( error ) { console.error( error.stack || error ) } )</script>
 
 </html>

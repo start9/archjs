@@ -44,10 +44,10 @@ bool bridge_retro_environment( unsigned command, void * data )
         enum retro_pixel_format const * retro_pixel_format = (enum retro_pixel_format *) data;
         struct input_format const * input_format = get_input_format( *retro_pixel_format );
 
-        if ( !input_format || !bridge_virtjs_screen_validate_input_format( input_format ) )
+        if ( !input_format || !bridge_virtjs_screen_validate_input_format( input_format->depth, input_format->r_mask, input_format->g_mask, input_format->b_mask, input_format->a_mask ) )
             return false;
 
-        bridge_virtjs_screen_set_input_format( input_format );
+        bridge_virtjs_screen_set_input_format( input_format->depth, input_format->r_mask, input_format->g_mask, input_format->b_mask, input_format->a_mask );
         return true;
 
     } break ;
@@ -76,10 +76,14 @@ int16_t bridge_retro_input_state( unsigned port, unsigned device, unsigned index
 
 void bridge_retro_audio_sample( int16_t left, int16_t right )
 {
-    return bridge_virtjs_audio_push_sample( left, right );
+    int16_t sample[] = { left, right };
+
+    bridge_virtjs_audio_push_sample_batch( sample, 1 );
 }
 
-size_t bridge_retro_audio_sample_batch( int16_t const * data, size_t frame )
+size_t bridge_retro_audio_sample_batch( int16_t const * samples, size_t count )
 {
-    return bridge_virtjs_audio_push_sample_batch( data, frame );
+    bridge_virtjs_audio_push_sample_batch( samples, count );
+
+    return count;
 }

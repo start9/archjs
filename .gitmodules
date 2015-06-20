@@ -1,3 +1,6 @@
 [submodule "example/virtjs"]
 	path = example/virtjs
 	url = https://github.com/arcanis/virtjs.git
+[submodule "example/taisel"]
+	path = example/taisel
+	url = git@github.com:start9/taisel

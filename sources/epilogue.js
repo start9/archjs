@@ -20,6 +20,7 @@
         this.screen = this._emscripten.Module.screen = devices.screen;
         this.timer = this._emscripten.Module.timer = devices.timer;
         this.input = this._emscripten.Module.input = devices.input;
+        this.audio = this._emscripten.Module.audio = devices.audio;
 
         this._lastCreatedFile = null;
 

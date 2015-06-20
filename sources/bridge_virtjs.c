@@ -179,14 +179,22 @@ void bridge_virtjs_timer_stop( void )
     g_timer_is_running = false;
 }
 
-bool bridge_virtjs_screen_validate_input_format( struct input_format const * input_format )
+bool bridge_virtjs_screen_validate_input_format( unsigned depth, uint32_t r_mask, uint32_t g_mask, uint32_t b_mask, uint32_t a_mask )
 {
     return true;
 }
 
-void bridge_virtjs_screen_set_input_format( struct input_format const * input_format )
+void bridge_virtjs_screen_set_input_format( unsigned depth, uint32_t r_mask, uint32_t g_mask, uint32_t b_mask, uint32_t a_mask )
 {
-    g_input_format = input_format;
+    static struct input_format input_format;
+    g_input_format = &input_format;
+
+    input_format.depth = depth;
+
+    input_format.r_mask = r_mask;
+    input_format.g_mask = g_mask;
+    input_format.b_mask = b_mask;
+    input_format.a_mask = a_mask;
 }
 
 void bridge_virtjs_screen_set_input_size( unsigned width, unsigned height, unsigned pitch )
@@ -233,14 +241,19 @@ void bridge_virtjs_screen_flush_screen( void )
     g_pending = NULL;
 }
 
-void bridge_virtjs_audio_set_sample_rate( double sample_rate )
+bool bridge_virtjs_audio_validate_input_format( unsigned sample_rate )
+{
+    return true;
+}
+
+void bridge_virtjs_audio_set_input_format( unsigned sample_rate )
 {
     SDL_InitSubSystem( SDL_INIT_AUDIO );
 
     SDL_AudioSpec desired_spec;
     SDL_AudioSpec obtained_spec;
 
-    desired_spec.freq = ( int ) sample_rate;
+    desired_spec.freq = sample_rate;
     desired_spec.format = AUDIO_S16SYS;
     desired_spec.channels = 2;
     desired_spec.samples = 1024;
@@ -253,15 +266,7 @@ void bridge_virtjs_audio_set_sample_rate( double sample_rate )
 
 }
 
-void bridge_virtjs_audio_push_sample( int16_t left, int16_t right )
-{
-    int16_t sample[] = { left, right };
-    audio_write( sample, 1 );
-}
-
-size_t bridge_virtjs_audio_push_sample_batch( int16_t const * samples, size_t count )
+void bridge_virtjs_audio_push_sample_batch( int16_t const * samples, unsigned count )
 {
     audio_write( samples, count );
-
-    return count;
 }
