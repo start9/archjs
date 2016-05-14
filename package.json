@@ -1,0 +1,8 @@
+{
+  "name": "arch.js",
+  "description": "Emscripten + Libretro = ♥",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "virtjs": "^0.2.3"
+  }
+}
