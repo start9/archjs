@@ -1,12 +1,9 @@
 
-        return { Module : Module, FS : FS, Runtime : Runtime };
+        return { Module: Module, FS: FS, Runtime: Runtime };
 
     });
 
-    if (! self.Archjs)
-        self.Archjs = { byName : { } };
-
-    var Engine = self.Archjs.byName['@(ENGINE_NAME)'] = function (options) {
+    var Engine = function (options) {
 
         var devices = options.devices;
 
@@ -172,4 +169,6 @@
 
     };
 
-})(self);
+    return Engine;
+
+}));

@@ -79,7 +79,7 @@ all: $(TARGET)
 $(TARGET): $(SOURCES) $(EXTRA_SOURCES)
 	$(CXX) -o $(TARGET) $(filter-out %.js, $(SOURCES)) $(addprefix --js-library , $(filter %.js, $(SOURCES))) $(LDFLAGS)
 ifdef EMMAKEN_COMPILER
-	cat sources/prologue.js > $(TARGET).tmp
+	cat sources/prologue.js | sed -e 's/@(ENGINE_NAME)/$(ENGINE_NAME)/g' -e 's/@(ENGINE_ROM_NAME)/$(ENGINE_ROM_NAME)/' > $(TARGET).tmp
 	cat $(TARGET) >> $(TARGET).tmp
 	cat sources/epilogue.js | sed -e 's/@(ENGINE_NAME)/$(ENGINE_NAME)/g' -e 's/@(ENGINE_ROM_NAME)/$(ENGINE_ROM_NAME)/' >> $(TARGET).tmp
 	mv $(TARGET).tmp $(TARGET)
