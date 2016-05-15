@@ -4,9 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "build": "find . \\( -name 'Makefile.*' -a -not -name 'Makefile.common' \\) -exec emmake make -f {} \\;",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "gh-pages": "(git checkout gh-pages && git reset --hard master && npm run build && git add -f build && git commit -m gh-pages && git push -f --set-upstream origin gh-pages && git checkout -)"
   },
   "peerDependencies": {
-    "virtjs": "^0.2.3"
+    "virtjs": "^0.3.4"
   }
 }
