@@ -28,9 +28,9 @@ struct input_format format_xrgb8888 = {
     .a_mask = 0x00000000
 };
 
-struct input_format const * get_input_format( enum retro_pixel_format input_format )
+struct input_format const * get_input_format(enum retro_pixel_format input_format)
 {
-    switch ( input_format ) {
+    switch (input_format) {
     case RETRO_PIXEL_FORMAT_0RGB1555 : return &format_0rgb1555;
     case RETRO_PIXEL_FORMAT_XRGB8888 : return &format_xrgb8888;
     case RETRO_PIXEL_FORMAT_RGB565 : return &format_rgb565;

@@ -15,4 +15,4 @@ struct input_format {
 
 };
 
-struct input_format const * get_input_format( enum retro_pixel_format pixel_format );
+struct input_format const * get_input_format(enum retro_pixel_format pixel_format);

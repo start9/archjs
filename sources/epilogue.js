@@ -1,177 +1,175 @@
 
         return { Module : Module, FS : FS, Runtime : Runtime };
 
-    } );
+    });
 
-    if ( ! self.Archjs )
+    if (! self.Archjs)
         self.Archjs = { byName : { } };
 
-    var Engine = self.Archjs.byName[ '@(ENGINE_NAME)' ] = function ( options ) {
+    var Engine = self.Archjs.byName['@(ENGINE_NAME)'] = function (options) {
 
         var devices = options.devices;
 
-        this._defaultFileName = options.defaultFileName || '@(ENGINE_ROM_NAME)';
+        this.defaultFileName = options.defaultFileName || '@(ENGINE_ROM_NAME)';
 
-        this._emscripten = instanciateEmscripten( );
+        this.emscripten = instanciateEmscripten();
 
-        this._emscripten.print = function ( message ) { console.log( message ); };
-        this._emscripten.printErr = function ( message ) { console.error( message ); };
+        this.emscripten.print = function (message) { console.log(message); };
+        this.emscripten.printErr = function (message) { console.error(message); };
 
-        this.screen = this._emscripten.Module.screen = devices.screen;
-        this.timer = this._emscripten.Module.timer = devices.timer;
-        this.input = this._emscripten.Module.input = devices.input;
-        this.audio = this._emscripten.Module.audio = devices.audio;
+        this.screen = this.emscripten.Module.screen = devices.screen;
+        this.timer = this.emscripten.Module.timer = devices.timer;
+        this.input = this.emscripten.Module.input = devices.input;
+        this.audio = this.emscripten.Module.audio = devices.audio;
 
-        this._lastCreatedFile = null;
+        this.lastCreatedFile = null;
 
-        this._frontendStart = this._emscripten.Module.cwrap( 'frontend_start', null, [ ] );
-        this._frontendStatus = this._emscripten.Module.cwrap( 'frontend_status', 'number', [ ] );
-        this._frontendStop = this._emscripten.Module.cwrap( 'frontend_stop', null, [ ] );
+        this.frontendStart = this.emscripten.Module.cwrap('frontend_start', null, []);
+        this.frontendStatus = this.emscripten.Module.cwrap('frontend_status', 'number', []);
+        this.frontendStop = this.emscripten.Module.cwrap('frontend_stop', null, []);
 
-        this._frontendLoadGame = this._emscripten.Module.cwrap( 'frontend_load_game', 'number', [ 'number' ] );
-        this._frontendUnloadGame = this._emscripten.Module.cwrap( 'frontend_unload_game', 'number', [ ] );
+        this.frontendLoadGame = this.emscripten.Module.cwrap('frontend_load_game', 'number', [ 'number' ]);
+        this.frontendUnloadGame = this.emscripten.Module.cwrap('frontend_unload_game', 'number', []);
 
-        this._frontendGetState = this._emscripten.Module.cwrap( 'frontend_get_state', 'number', [ 'number', 'number' ] );
-        this._frontendSetState = this._emscripten.Module.cwrap( 'frontend_set_state', 'number', [ 'number', 'number' ] );
-        this._frontendResetState = this._emscripten.Module.cwrap( 'frontend_reset_state', 'number', [ ] );
+        this.frontendGetState = this.emscripten.Module.cwrap('frontend_get_state', 'number', [ 'number', 'number' ]);
+        this.frontendSetState = this.emscripten.Module.cwrap('frontend_set_state', 'number', [ 'number', 'number' ]);
+        this.frontendResetState = this.emscripten.Module.cwrap('frontend_reset_state', 'number', []);
 
-        this._emscripten.Module.callMain( [ ] );
+        this.emscripten.Module.callMain([]);
 
     };
 
-    Engine.inputMap = { };
+    Engine.codeMap = { };
 
     // These values come from the libretro header
 
-    Engine.inputMap.LEFT = 6;
-    Engine.inputMap.RIGHT = 7;
-    Engine.inputMap.UP = 4;
-    Engine.inputMap.DOWN = 5;
+    Engine.codeMap.LEFT = 6;
+    Engine.codeMap.RIGHT = 7;
+    Engine.codeMap.UP = 4;
+    Engine.codeMap.DOWN = 5;
 
-    Engine.inputMap.A = 8;
-    Engine.inputMap.B = 0;
+    Engine.codeMap.A = 8;
+    Engine.codeMap.B = 0;
 
-    Engine.inputMap.L = 10;
-    Engine.inputMap.R = 11;
+    Engine.codeMap.L = 10;
+    Engine.codeMap.R = 11;
 
-    Engine.inputMap.SELECT = 2;
-    Engine.inputMap.START = 3;
+    Engine.codeMap.SELECT = 2;
+    Engine.codeMap.START = 3;
 
-    Engine.prototype.loadArrayBuffer = function ( arrayBuffer, options ) {
+    Engine.prototype.loadArrayBuffer = function (arrayBuffer, options) {
 
-        if ( ! this.stop( ) )
-            throw new Error( 'Cannot stop the engine to load a new game' );
+        if (!this.stop())
+            throw new Error('Cannot stop the engine to load a new game');
 
-        if ( typeof options === 'undefined' )
+        if (typeof options === 'undefined')
             options = { };
 
         var autoStart = options.autoStart;
         var initialState = options.initialState;
 
-        if ( typeof autoStart === 'undefined' )
+        if (typeof autoStart === 'undefined')
             autoStart = true;
 
-        if ( this._lastCreatedFile ) {
-            this._frontendUnloadGame( );
-            this._emscripten.FS.unlink( this._lastCreatedFile );
+        if (this.lastCreatedFile) {
+            this.frontendUnloadGame();
+            this.emscripten.FS.unlink(this.lastCreatedFile);
         }
 
-        this._lastCreatedFile = '/' + ( options.fileName || this._defaultFileName );
+        this.lastCreatedFile = '/' + (options.fileName || this.defaultFileName);
 
-        var stackPointer = this._emscripten.Runtime.stackSave( );
+        var stackPointer = this.emscripten.Runtime.stackSave();
 
-        var gamePathPointer = this._emscripten.Module.allocate( this._emscripten.Module.intArrayFromString( this._lastCreatedFile ), 'i8', this._emscripten.Module.ALLOC_STACK );
-        this._emscripten.FS.writeFile( this._lastCreatedFile, new Uint8Array( arrayBuffer ), { encoding : 'binary' } );
+        var gamePathPointer = this.emscripten.Module.allocate(this.emscripten.Module.intArrayFromString(this.lastCreatedFile), 'i8', this.emscripten.Module.ALLOC_STACK);
+        this.emscripten.FS.writeFile(this.lastCreatedFile, new Uint8Array(arrayBuffer), { encoding : 'binary' });
 
-        var result = this._frontendLoadGame( gamePathPointer );
+        var result = this.frontendLoadGame(gamePathPointer);
 
-        this._emscripten.Runtime.stackRestore( stackPointer );
+        this.emscripten.Runtime.stackRestore(stackPointer);
 
-        if ( result < 0 )
-            throw new Error( 'Game load failed - the emulator returned ' + result );
+        if (result < 0)
+            throw new Error('Game load failed - the emulator returned ' + result);
 
-        if ( initialState )
-            this.setState( initialState );
+        if (initialState)
+            this.setState(initialState);
 
-        if ( autoStart ) {
-            this.start( );
+        if (autoStart) {
+            this.start();
         }
 
     };
 
-    Engine.prototype.resetState = function ( ) {
+    Engine.prototype.resetState = function () {
 
-        var result = this._frontendResetState( );
+        var result = this.frontendResetState();
 
-        if ( result < 0 )
-            throw new Error( 'Cannot reset state at this time - the emulator returned ' + result );
-
-        return this;
-
-    };
-
-    Engine.prototype.setState = function ( arrayBuffer ) {
-
-        if ( ! arrayBuffer )
-            return this.resetState( );
-
-        var stackPointer = this._emscripten.Runtime.stackSave( );
-
-        var emdata = this._emscripten.Module.allocate( new Uint8Array( arrayBuffer ), 'i8', this._emscripten.Module.ALLOC_STACK );
-        var result = this._frontendSetState( emdata, arrayBuffer.byteLength );
-
-        this._emscripten.Runtime.stackRestore( stackPointer );
-
-        if ( result < 0 )
-            throw new Error( 'Cannot set state at this time - the emulator returned ' + result );
+        if (result < 0)
+            throw new Error('Cannot reset state at this time - the emulator returned ' + result);
 
         return this;
 
     };
 
-    Engine.prototype.getState = function ( ) {
+    Engine.prototype.setState = function (arrayBuffer) {
 
-        var stackPointer = this._emscripten.Runtime.stackSave( );
+        if (!arrayBuffer)
+            return this.resetState();
 
-        var emDataPtr = this._emscripten.Module.allocate( [ 0 ], '*', this._emscripten.Module.ALLOC_STACK );
-        var emSizePtr = this._emscripten.Module.allocate( [ 0 ], 'i32', this._emscripten.Module.ALLOC_STACK );
+        var stackPointer = this.emscripten.Runtime.stackSave();
 
-        var result = this._frontendGetState( emDataPtr, emSizePtr );
+        var emdata = this.emscripten.Module.allocate(new Uint8Array(arrayBuffer), 'i8', this.emscripten.Module.ALLOC_STACK);
+        var result = this.frontendSetState(emdata, arrayBuffer.byteLength);
 
-        var emdata = this._emscripten.Module.getValue( emDataPtr, '*' );
-        var emsize = this._emscripten.Module.getValue( emSizePtr, 'i32' );
+        this.emscripten.Runtime.stackRestore(stackPointer);
 
-        console.log( emdata.toString( 16 ), emsize );
-
-        this._emscripten.Runtime.stackRestore( stackPointer );
-
-        if ( result < 0 )
-            throw new Error( 'Cannot get state at this time - the emulator returned ' + result );
-
-        return this._emscripten.Module.HEAPU8.buffer.slice( emdata, emdata + emsize );
-
-    };
-
-    Engine.prototype.start = function ( ) {
-
-        this._frontendStart( );
+        if (result < 0)
+            throw new Error('Cannot set state at this time - the emulator returned ' + result);
 
         return this;
 
     };
 
-    Engine.prototype.isRunning = function ( ) {
+    Engine.prototype.getState = function () {
 
-        return Boolean( this._frontendStatus( ) );
+        var stackPointer = this.emscripten.Runtime.stackSave();
+
+        var emDataPtr = this.emscripten.Module.allocate([ 0 ], '*', this.emscripten.Module.ALLOC_STACK);
+        var emSizePtr = this.emscripten.Module.allocate([ 0 ], 'i32', this.emscripten.Module.ALLOC_STACK);
+
+        var result = this.frontendGetState(emDataPtr, emSizePtr);
+
+        var emdata = this.emscripten.Module.getValue(emDataPtr, '*');
+        var emsize = this.emscripten.Module.getValue(emSizePtr, 'i32');
+
+        this.emscripten.Runtime.stackRestore(stackPointer);
+
+        if (result < 0)
+            throw new Error('Cannot get state at this time - the emulator returned ' + result);
+
+        return this.emscripten.Module.HEAPU8.buffer.slice(emdata, emdata + emsize);
 
     };
 
-    Engine.prototype.stop = function ( ) {
+    Engine.prototype.start = function () {
 
-        this._frontendStop( );
+        this.frontendStart();
 
         return this;
 
     };
 
-} )( self );
+    Engine.prototype.isRunning = function () {
+
+        return Boolean(this.frontendStatus());
+
+    };
+
+    Engine.prototype.stop = function () {
+
+        this.frontendStop();
+
+        return this;
+
+    };
+
+})(self);

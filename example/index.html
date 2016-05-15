@@ -14,24 +14,16 @@
         <div id="overlay">Click to select a file</div>
     </body>
 
-    <script>var ENGINE = location.hash.substring( 1, location.hash.indexOf( ':' ) !== -1 ? location.hash.indexOf( ':' ) : undefined )</script>
-    <script>var GAMEPATH = location.hash.indexOf( ':' ) !== -1 ? location.hash.substr( location.hash.indexOf( ':' ) + 1 ) : undefined</script>
+    <script>var ENGINE = location.hash.substring(1, location.hash.indexOf(':') !== -1 ? location.hash.indexOf(':') : undefined)</script>
+    <script>var GAMEPATH = location.hash.indexOf(':') !== -1 ? location.hash.substr(location.hash.indexOf(':') + 1) : undefined</script>
 
     <script>document.write('<script src="../dist/archjs-'+ENGINE+'.js"></'+'script>')</script>
 
-    <script src="https://rawgit.com/taisel/XAudioJS/master/XAudioServer.js"></script>
-    <script src="https://rawgit.com/taisel/XAudioJS/master/resampler.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fpsmeter/0.3.1/fpsmeter.min.js"></script>
 
-    <script src="vendors/CoreJs-0.9.6.min.js"></script>
-    <script src="vendors/FpsMeter-0.3.1.min.js"></script>
+    <script src="https://npmcdn.com/virtjs@0.3.4/build/main.js"></script>
+    <script src="https://npmcdn.com/audiojs@0.1.0/build/main.js"></script>
 
-    <script src="https://jspm.io/system.js"></script>
-
-    <script>System.paths['virtjs/*'] = './virtjs/sources/*.js'</script>
-    <script>System.paths['taisel/*'] = './taisel/sources/*.js'</script>
-
-    <script>System.config({ transpiler: 'babel', babelOptions: { stage: 0 } })</script>
-
-    <script>System.import('~/main').then( function ( m ) { return m.main( ); } ).catch( function ( error ) { console.error( error.stack || error ) } )</script>
+    <script src="./main.js"></script>
 
 </html>

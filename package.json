@@ -2,6 +2,10 @@
   "name": "arch.js",
   "description": "Emscripten + Libretro = ♥",
   "version": "1.0.0",
+  "scripts": {
+    "build": "find . \\( -name 'Makefile.*' -a -not -name 'Makefile.common' \\) -exec emmake make -f {} \\;",
+    "prepublish": "npm run build"
+  },
   "peerDependencies": {
     "virtjs": "^0.2.3"
   }

@@ -1,3 +1,3 @@
-( function ( self ) {
+(function (self) {
 
-    var instanciateEmscripten = ( function ( Module ) {
+    var instanciateEmscripten = (function (Module) {

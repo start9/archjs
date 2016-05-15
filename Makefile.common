@@ -48,7 +48,7 @@ else
       sources/main.c.o
 
     EXTRA_SOURCES = \
-      systems/libretro-$(ENGINE_NAME).a \
+      systems/libretro-$(ENGINE_NAME).so \
       Makefile.$(ENGINE_NAME) \
       Makefile.common
 
